@@ -2,19 +2,25 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useAuthController } from "../../controllers/useAuthController";
+import { useAdminController } from "../../controllers/useAdminController";
+import { useModal } from "../../context/ModalContext";
 import { useCartController } from "../../controllers/useCartController";
 import LoginModal from "./modals/LoginModal";
 import RegisterModal from "./modals/RegisterModal";
 import ForgotModal from "./modals/ForgotModal";
 
 export default function Navbar() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { logout } = useAuthController();
+  const { isAdmin } = useAdminController();
   const { count, openCart } = useCartController();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [modal, setModal] = useState(null);
+  const {
+    authModal,
+    openLoginModal, openRegisterModal, openForgotModal, closeAuthModal
+  } = useModal();
   const [profileOpen, setProfileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -88,16 +94,19 @@ export default function Navbar() {
                       <hr />
                     </>
                   )}
+                  <button onClick={() => { navigate("/mis-compras"); setProfileOpen(false); }} style={{ color: "grey" }}>
+                    <i className="fas fa-shopping-bag" /> Mis compras
+                  </button>
+                  <hr />
                   <button onClick={() => { logout(); setProfileOpen(false); }}>
                     <i className="fas fa-sign-out-alt" /> Cerrar sesión
                   </button>
-                  <hr />
                   
                 </div>
               )}
             </div>
           ) : (
-            <button className="button-login" onClick={() => setModal("login")}>
+            <button className="button-login" onClick={openLoginModal}>
               Login
             </button>
           )}
@@ -111,9 +120,9 @@ export default function Navbar() {
       </header>
 
       {/* Modales */}
-      {modal === "login"    && <LoginModal    onClose={() => setModal(null)} onRegister={() => setModal("register")} onForgot={() => setModal("forgot")} />}
-      {modal === "register" && <RegisterModal onClose={() => setModal(null)} onLogin={() => setModal("login")} />}
-      {modal === "forgot"   && <ForgotModal   onClose={() => setModal(null)} onLogin={() => setModal("login")} />}
+      {authModal === "login"    && <LoginModal    onClose={closeAuthModal} onRegister={openRegisterModal} onForgot={openForgotModal} />}
+      {authModal === "register" && <RegisterModal onClose={closeAuthModal} onLogin={openLoginModal} />}
+      {authModal === "forgot"   && <ForgotModal   onClose={closeAuthModal} onLogin={openLoginModal} />}
     </>
   );
 }

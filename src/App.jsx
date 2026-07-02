@@ -14,6 +14,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider }    from "./context/AuthContext";
 import { CartProvider }    from "./context/CartContext";
+import { ModalProvider }   from "./context/ModalContext";
 import MainLayout          from "./views/layouts/MainLayout";
 import Home                from "./views/pages/Home";
 import Shop                from "./views/pages/Shop";
@@ -28,6 +29,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ModalProvider>
         <CartProvider>
           <MainLayout>
             <Routes>
@@ -42,6 +44,7 @@ export default function App() {
             </Routes>
           </MainLayout>
         </CartProvider>
+        </ModalProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -1,6 +1,7 @@
 /**
  * @fileoverview Página de Historial de Compras
- * Muestra el historial de compras del cliente logueado.
+ * Muestra el historial de compras del cliente logueado:
+ * estado del pedido, productos, cantidad, talla y dirección de envío.
  * Ruta: /mis-compras
  */
 
@@ -12,8 +13,8 @@ import { ventaService } from "../../services/ventaService";
 export default function MisCompras() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [ventas,   setVentas]   = useState([]);
-  const [loading,  setLoading]  = useState(true);
+  const [ventas,  setVentas]  = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
@@ -49,11 +50,14 @@ export default function MisCompras() {
           {ventas.map(venta => (
             <div className="compra-card" key={venta.id}>
 
-              {/* Encabezado de la venta */}
               <div className="compra-card-header">
                 <div>
                   <span className="compra-id">Pedido #{venta.id.slice(0,8).toUpperCase()}</span>
-                  <span className={`compra-estado ${venta.estado}`}>{venta.estado}</span>
+                  <span className={`compra-estado ${venta.estado}`}>
+                    {venta.estado === "completada" ? "Aprobada"
+                     : venta.estado === "cancelada"  ? "Rechazada"
+                     : "Pendiente"}
+                  </span>
                 </div>
                 <div className="compra-meta">
                   <span>{new Date(venta.created_at).toLocaleDateString("es-CO", {
@@ -63,7 +67,15 @@ export default function MisCompras() {
                 </div>
               </div>
 
-              {/* Productos de la venta */}
+              {/* Dirección de envío, si la tiene */}
+              {venta.direccion_envio && (
+                <div className="compra-envio">
+                  <i className="fas fa-truck" />
+                  <span>{venta.direccion_envio}</span>
+                  {venta.telefono_contacto && <small> · Tel: {venta.telefono_contacto}</small>}
+                </div>
+              )}
+
               <div className="compra-items">
                 {venta.detalle_venta?.map((detalle, i) => (
                   <div className="compra-item" key={i}>
@@ -76,6 +88,13 @@ export default function MisCompras() {
                       <span>
                         Cant: {detalle.cantidad}
                         {detalle.talla && ` · Talla: ${detalle.talla}`}
+                        {detalle.color && (
+                          <span style={{
+                            display: "inline-block", width: 10, height: 10,
+                            background: detalle.color, borderRadius: "50%",
+                            marginLeft: 6, verticalAlign: "middle", border: "1px solid #ddd"
+                          }} />
+                        )}
                       </span>
                       <strong>${Number(detalle.precio_unitario).toLocaleString()}</strong>
                     </div>
